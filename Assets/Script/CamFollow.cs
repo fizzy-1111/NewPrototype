@@ -8,7 +8,10 @@ public class CamFollow : MonoBehaviour
     public float distance = 10f; // the distance between the camera and the object
     public float height = 5f; // the height offset between the camera and the object
     public float damping = 1f; // the camera movement damping
-
+    Portal[] portals;
+    void Awake () {
+        portals = FindObjectsOfType<Portal> ();
+    }
     void LateUpdate()
     {
         if (target != null) {
@@ -21,5 +24,21 @@ public class CamFollow : MonoBehaviour
             //Vector3 trueTarget=new Vector3(target.position.x,2,target.position.z);
             //transform.LookAt(trueTarget);
         }
+    }
+
+
+    void OnPreCull () {
+
+        for (int i = 0; i < portals.Length; i++) {
+            portals[i].PrePortalRender ();
+        }
+        for (int i = 0; i < portals.Length; i++) {
+            portals[i].Render ();
+        }
+
+        for (int i = 0; i < portals.Length; i++) {
+            portals[i].PostPortalRender ();
+        }
+
     }
 }

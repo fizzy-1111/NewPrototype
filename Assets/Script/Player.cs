@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : PortalTraveller
 {
     // Start is called before the first frame update
     Vector3 pos;
@@ -10,8 +10,12 @@ public class Player : MonoBehaviour
     public float jumpHeight = 2f; // the force of the jump
     public float jumpTime = 0.5f; // the time the jump will last
     public bool isGrounded=true;
+    public bool stopMoving=false;
     LayerMask groundMask=1<<6;
+    LayerMask portalMask=1<<7;
     Rigidbody rb ;
+    public GameObject ball;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -20,10 +24,11 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(TouchManager.Instance.getCurrentHit()!=Vector3.zero){
-            MoveTowardsPosition(transform.gameObject,TouchManager.Instance.getCurrentHit(),speed);
-        }
+        Moving();
+        //detectPortal();
         playerJump();
+        shoot();
+        
     }
     public void MoveTowardsPosition(GameObject obj, Vector3 position, float speed)
     {
@@ -61,6 +66,33 @@ public class Player : MonoBehaviour
         }
         else{
             isGrounded=false;
+        }
+    }
+    void movingAgain(){
+        stopMoving=false;
+    }
+    void Moving(){
+        if(TouchManager.Instance.getCurrentHit()!=Vector3.zero&&!stopMoving){
+            MoveTowardsPosition(transform.gameObject,TouchManager.Instance.getCurrentHit(),speed);
+            Vector3 direction = TouchManager.Instance.getCurrentHit() - transform.position;
+              // Determine which direction to rotate towards
+
+            // The step size is equal to speed times frame time.
+            float singleStep = speed * Time.deltaTime;
+
+            // Rotate the forward vector towards the target direction by one step
+            Vector3 newDirection = Vector3.RotateTowards(transform.forward, direction, singleStep, 0.0f);
+            Vector3 xzOnlyDirection = new Vector3(newDirection.x, 0, newDirection.z);
+            // Draw a ray pointing at our target in
+            Debug.DrawRay(transform.position, xzOnlyDirection, Color.red);
+            transform.rotation = Quaternion.LookRotation(xzOnlyDirection);
+        }
+    }
+    void shoot(){
+        if(Input.GetKeyDown(KeyCode.Q)){
+            Debug.Log("shooting");
+            GameObject newball= Instantiate(ball,transform.position+ transform.forward*2,Quaternion.identity);
+            newball.GetComponent<Rigidbody>().AddForce(transform.forward*30,ForceMode.Impulse);
         }
     }
 }

@@ -29,7 +29,6 @@ public class TouchManager : Singleton<TouchManager>
         isHit = Physics.Raycast(ray, out hit, 10000,maskclick);
         if (isHit)
         {
-            //Debug.Log(hit.transform.name);
             //Debug.Log(hit.point);
             currentHit=hit.point;
         }
